@@ -6,340 +6,274 @@ struct Node {
     struct Node *next;
 };
 
-struct Node *head = NULL;
-
-// Insert Node at End
-void insert() {
+// Insert at end
+void insert(struct Node **head) {
     int value;
     printf("Enter value: ");
     scanf("%d", &value);
 
-    struct Node newnode = (struct Node)malloc(sizeof(struct Node));
-    newnode->data = value;
-    newnode->next = NULL;
+    struct Node newNode = (struct Node)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = NULL;
 
-    if (head == NULL) {
-        head = newnode;
+    if (*head == NULL) {
+        *head = newNode;
+        return;
     }
-    else {
-        struct Node *temp = head;
-        while (temp->next != NULL)
-            temp = temp->next;
-        temp->next = newnode;
-    }
-    printf("Node inserted.\n");
+
+    struct Node *temp = *head;
+    while (temp->next != NULL)
+        temp = temp->next;
+
+    temp->next = newNode;
 }
 
 // Print List
-void printList() {
-    if (head == NULL) {
-        printf("List is empty.\n");
+void printList(struct Node *head) {
+    if (!head) {
+        printf("List empty\n"); 
         return;
     }
     struct Node *temp = head;
     printf("List: ");
     while (temp != NULL) {
-        printf("%d -> ", temp->data);
+        printf("%d ", temp->data);
         temp = temp->next;
     }
-    printf("NULL\n");
+    printf("\n");
 }
 
-// Search Node
-void search() {
-    int key;
+// Search Value
+void search(struct Node *head) {
+    int key, pos = 1, found = 0;
     printf("Enter value to search: ");
     scanf("%d", &key);
 
-    struct Node *temp = head;
-    int pos = 1;
-
-    while (temp != NULL) {
-        if (temp->data == key) {
-            printf("Element found at position %d\n", pos);
-            return;
+    while (head != NULL) {
+        if (head->data == key) {
+            printf("Found at position %d\n", pos);
+            found = 1;
         }
-        temp = temp->next;
+        head = head->next;
         pos++;
     }
-    printf("Element not found.\n");
+    if (!found)
+        printf("Not Found\n");
 }
 
 // Delete Middle Node
-void deleteMiddle() {
-    if (head == NULL || head->next == NULL) {
-        printf("Not enough elements.\n");
+void deleteMiddle(struct Node **head) {
+    if (*head == NULL || (*head)->next == NULL) {
+        printf("Cannot delete middle\n");
         return;
     }
 
-    struct Node *slow = head, *fast = head, *prev = NULL;
-
-    while (fast != NULL && fast->next != NULL) {
+    struct Node *slow = *head, *fast = *head, *prev = NULL;
+    while (fast && fast->next) {
         fast = fast->next->next;
         prev = slow;
         slow = slow->next;
     }
-
     prev->next = slow->next;
-    printf("Middle element %d deleted.\n", slow->data);
     free(slow);
+    printf("Middle node deleted.\n");
 }
 
-// Find Smallest Element
-void smallest() {
-    if (head == NULL) {
-        printf("List is empty.\n");
-        return;
-    }
+// Find Smallest
+int smallest(struct Node *head) {
     int min = head->data;
-    struct Node *temp = head->next;
-
-    while (temp != NULL) {
-        if (temp->data < min)
-            min = temp->data;
-        temp = temp->next;
+    while (head) {
+        if (head->data < min) min = head->data;
+        head = head->next;
     }
-    printf("Smallest element = %d\n", min);
+    return min;
 }
 
-// Find Largest Element
-void largest() {
-    if (head == NULL) {
-        printf("List is empty.\n");
-        return;
-    }
+// Find Largest
+int largest(struct Node *head) {
     int max = head->data;
-    struct Node *temp = head->next;
-
-    while (temp != NULL) {
-        if (temp->data > max)
-            max = temp->data;
-        temp = temp->next;
+    while (head) {
+        if (head->data > max) max = head->data;
+        head = head->next;
     }
-    printf("Largest element = %d\n", max);
+    return max;
 }
 
-// Sort Ascending
-void sortAscending() {
-    if (head == NULL) {
-        printf("List is empty.\n");
-        return;
-    }
-    struct Node *i, *j;
-    int temp;
+// Delete Smallest Element
+void deleteSmallest(struct Node **head) {
+    if (*head == NULL) return;
 
-    for (i = head; i->next != NULL; i = i->next) {
-        for (j = i->next; j != NULL; j = j->next) {
-            if (i->data > j->data) {
-                temp = i->data;
-                i->data = j->data;
-                j->data = temp;
-            }
-        }
-    }
-    printf("List sorted in ascending order.\n");
-}
+    int min = smallest(*head);
+    struct Node *temp = *head, *prev = NULL;
 
-// Count Nodes
-void countNodes() {
-    int count = 0;
-    struct Node *temp = head;
-
-    while (temp != NULL) {
-        count++;
-        temp = temp->next;
-    }
-    printf("Total nodes = %d\n", count);
-}
-
-// Delete Smallest Node
-void deleteSmallest() {
-    if (head == NULL) {
-        printf("List is empty.\n");
+    if (temp->data == min) {
+        *head = temp->next;
+        free(temp);
         return;
     }
 
-    struct Node *temp = head, *prev = NULL;
-    int min = head->data;
-
-    struct Node *p = head->next;
-    while (p != NULL) {
-        if (p->data < min)
-            min = p->data;
-        p = p->next;
-    }
-
-    while (temp != NULL && temp->data != min) {
+    while (temp && temp->data != min) {
         prev = temp;
         temp = temp->next;
     }
-
-    if (temp == head) {
-        head = head->next;
-    }
-    else {
-        prev->next = temp->next;
-    }
-
+    prev->next = temp->next;
     free(temp);
-    printf("Smallest element deleted.\n");
 }
 
-// Delete Largest Node
-void deleteLargest() {
-    if (head == NULL) {
-        printf("List is empty.\n");
+// Delete Largest Element
+void deleteLargest(struct Node **head) {
+    if (*head == NULL) return;
+
+    int max = largest(*head);
+    struct Node *temp = *head, *prev = NULL;
+
+    if (temp->data == max) {
+        *head = temp->next;
+        free(temp);
         return;
     }
 
-    struct Node *temp = head, *prev = NULL;
-    int max = head->data;
-
-    struct Node *p = head->next;
-    while (p != NULL) {
-        if (p->data > max)
-            max = p->data;
-        p = p->next;
-    }
-
-    while (temp != NULL && temp->data != max) {
+    while (temp && temp->data != max) {
         prev = temp;
         temp = temp->next;
     }
-
-    if (temp == head) {
-        head = head->next;
-    }
-    else {
-        prev->next = temp->next;
-    }
-
+    prev->next = temp->next;
     free(temp);
-    printf("Largest element deleted.\n");
 }
 
-// Reverse Linked List
-void reverse() {
-    struct Node *prev = NULL, *curr = head, *next = NULL;
-
-    while (curr != NULL) {
+// Reverse
+void reverse(struct Node **head) {
+    struct Node *prev = NULL, *curr = *head, *next = NULL;
+    while (curr) {
         next = curr->next;
         curr->next = prev;
         prev = curr;
         curr = next;
     }
-
-    head = prev;
-    printf("List reversed.\n");
+    *head = prev;
 }
 
 // Insert at Position
-void insertPos() {
+void insertPos(struct Node **head) {
     int pos, value;
-    printf("Enter position: ");
-    scanf("%d", &pos);
     printf("Enter value: ");
     scanf("%d", &value);
+    printf("Enter position: ");
+    scanf("%d", &pos);
 
-    struct Node newnode = (struct Node)malloc(sizeof(struct Node));
-    newnode->data = value;
+    struct Node newNode = (struct Node)malloc(sizeof(struct Node));
+    newNode->data = value;
 
     if (pos == 1) {
-        newnode->next = head;
-        head = newnode;
+        newNode->next = *head;
+        *head = newNode;
         return;
     }
 
-    struct Node *temp = head;
-    for (int i = 1; i < pos - 1 && temp != NULL; i++)
+    struct Node *temp = *head;
+    for (int i = 1; i < pos - 1 && temp; i++)
         temp = temp->next;
 
-    if (temp == NULL) {
-        printf("Invalid Position.\n");
-        return;
-    }
-
-    newnode->next = temp->next;
-    temp->next = newnode;
-    printf("Inserted.\n");
+    newNode->next = temp->next;
+    temp->next = newNode;
 }
 
-// Delete at Position
-void deletePos() {
+// Delete Nth Node
+void deleteNth(struct Node **head) {
     int pos;
     printf("Enter position to delete: ");
     scanf("%d", &pos);
 
-    if (head == NULL) {
-        printf("List empty.\n");
-        return;
-    }
+    if (*head == NULL) return;
 
-    struct Node *temp = head;
+    struct Node *temp = *head;
 
     if (pos == 1) {
-        head = head->next;
+        *head = temp->next;
         free(temp);
-        printf("Deleted.\n");
         return;
     }
 
-    struct Node *prev;
-    for (int i = 1; i < pos && temp != NULL; i++) {
+    struct Node *prev = NULL;
+    for (int i = 1; i < pos && temp; i++) {
         prev = temp;
         temp = temp->next;
     }
 
-    if (temp == NULL) {
-        printf("Invalid position.\n");
+    if (!temp) {
+        printf("Invalid position\n");
         return;
     }
 
     prev->next = temp->next;
     free(temp);
-    printf("Deleted.\n");
 }
 
-// MAIN MENU
+// 🔥 Search Duplicates
+void searchDuplicate(struct Node *head) {
+    int found = 0;
+    struct Node *ptr1 = head, *ptr2;
+    while (ptr1) {
+        ptr2 = ptr1->next;
+        while (ptr2) {
+            if (ptr1->data == ptr2->data) {
+                printf("Duplicate value found: %d\n", ptr1->data);
+                found = 1;
+            }
+            ptr2 = ptr2->next;
+        }
+        ptr1 = ptr1->next;
+    }
+    if (!found)
+        printf("No duplicates found.\n");
+}
+
+// 🔥 Delete All Duplicates
+void deleteDuplicates(struct Node **head) {
+    struct Node *ptr1 = *head, *ptr2, *dup;
+
+    while (ptr1 && ptr1->next) {
+        ptr2 = ptr1;
+        while (ptr2->next) {
+            if (ptr1->data == ptr2->next->data) {
+                dup = ptr2->next;
+                ptr2->next = ptr2->next->next;
+                free(dup);
+            }
+            else
+                ptr2 = ptr2->next;
+        }
+        ptr1 = ptr1->next;
+    }
+    printf("Duplicates deleted.\n");
+}
+
 int main() {
-    int choice;
+    struct Node *head = NULL;
+    int ch;
 
     while (1) {
-        printf("\n---- MENU ----\n");
-        printf("1. Insert Node\n");
-        printf("2. Print List\n");
-        printf("3. Search Node\n");
-        printf("4. Delete Middle Node\n");
-        printf("5. Find Smallest Element\n");
-        printf("6. Find Largest Element\n");
-        printf("7. Sort Ascending\n");
-        printf("8. Count Nodes\n");
-        printf("9. Delete Smallest Element\n");
-        printf("10. Delete Largest Element\n");
-        printf("11. Reverse List\n");
-        printf("12. Insert at Position\n");
-        printf("13. Delete at Position\n");
-        printf("14. Exit\n");
-
+        printf("\n--- MENU ---\n");
+        printf("1. Insert\n2. Print\n3. Search\n4. Delete Middle\n5. Find Smallest\n6. Find Largest\n7. Delete Smallest\n8. Delete Largest\n9. Reverse\n10. Insert at Position\n11. Delete Nth Node\n12. Search Duplicates\n13. Delete All Duplicates\n14. Exit\n");
         printf("Enter choice: ");
-        scanf("%d", &choice);
+        scanf("%d", &ch);
 
-        switch (choice) {
-            case 1: insert(); break;
-            case 2: printList(); break;
-            case 3: search(); break;
-            case 4: deleteMiddle(); break;
-            case 5: smallest(); break;
-            case 6: largest(); break;
-            case 7: sortAscending(); break;
-            case 8: countNodes(); break;
-            case 9: deleteSmallest(); break;
-            case 10: deleteLargest(); break;
-            case 11: reverse(); break;
-            case 12: insertPos(); break;
-            case 13: deletePos(); break;
+        switch (ch) {
+            case 1: insert(&head); break;
+            case 2: printList(head); break;
+            case 3: search(head); break;
+            case 4: deleteMiddle(&head); break;
+            case 5: printf("Smallest = %d\n", smallest(head)); break;
+            case 6: printf("Largest = %d\n", largest(head)); break;
+            case 7: deleteSmallest(&head); break;
+            case 8: deleteLargest(&head); break;
+            case 9: reverse(&head); break;
+            case 10: insertPos(&head); break;
+            case 11: deleteNth(&head); break;
+            case 12: searchDuplicate(head); break;
+            case 13: deleteDuplicates(&head); break;
             case 14: exit(0);
-            default: printf("Invalid choice.\n");
-        }
-    }
+        }
+    }
+    return 0;
 }
